@@ -119,4 +119,29 @@ public class AsyncAutoReloadTest extends AsyncReloadSupport implements TestConst
         assertEquals(Integer.valueOf(5), cfg.someValue());
     }
 
+    @HotReload(strValue="10", unit = MILLISECONDS, type = ASYNC)
+    interface OnlyHotReloadAnnotationWithStrTtlIsSpecified extends Config, Reloadable {
+        @DefaultValue("5")
+        Integer someValue();
+    }
+
+    @Test
+    public void testShouldNotCauseNullWithStrValue() {
+        OnlyHotReloadAnnotationWithStrTtlIsSpecified cfg = ConfigFactory.create(OnlyHotReloadAnnotationWithStrTtlIsSpecified.class);
+        assertEquals(Integer.valueOf(5), cfg.someValue());
+    }
+
+    @HotReload(strValue="${ttl}", unit = MILLISECONDS, type = ASYNC)
+    interface OnlyHotReloadAnnotationWithStrTtlUriIsSpecified extends Config, Reloadable {
+        @DefaultValue("5")
+        Integer someValue();
+    }
+
+    @Test
+    public void testShouldNotCauseNullWithStrValueAsUri() {
+        ConfigFactory.setProperty("ttl", "10");
+        OnlyHotReloadAnnotationWithStrTtlUriIsSpecified cfg = ConfigFactory.create(OnlyHotReloadAnnotationWithStrTtlUriIsSpecified.class);
+        assertEquals(Integer.valueOf(5), cfg.someValue());
+    }
+
 }

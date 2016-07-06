@@ -8,40 +8,22 @@
 
 package org.aeonbits.owner;
 
-import org.aeonbits.owner.event.ReloadEvent;
-import org.aeonbits.owner.event.ReloadListener;
-import org.aeonbits.owner.event.RollbackBatchException;
-import org.aeonbits.owner.event.RollbackException;
-import org.aeonbits.owner.event.RollbackOperationException;
-import org.aeonbits.owner.event.TransactionalPropertyChangeListener;
-import org.aeonbits.owner.event.TransactionalReloadListener;
+import org.aeonbits.owner.crypto.Decryptor;
+import org.aeonbits.owner.crypto.IdentityDecryptor;
+import org.aeonbits.owner.event.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Serializable;
+import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -49,14 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import static java.util.Collections.synchronizedList;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.PropertiesMapper.defaults;
-import static org.aeonbits.owner.Util.asString;
-import static org.aeonbits.owner.Util.eq;
-import static org.aeonbits.owner.Util.ignore;
-import static org.aeonbits.owner.Util.reverse;
-import static org.aeonbits.owner.Util.unsupported;
-
-import org.aeonbits.owner.crypto.Decryptor;
-import org.aeonbits.owner.crypto.IdentityDecryptor;
+import static org.aeonbits.owner.Util.*;
 
 /**
  * Loads properties and manages access to properties handling concurrency.
@@ -113,14 +88,20 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
         this.properties = properties;
         this.loaders = loaders;
         this.imports = imports;
-        ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
+        final ConfigURIFactory urlFactory = new ConfigURIFactory(clazz.getClassLoader(), expander);
         uris = toURIs(clazz.getAnnotation(Sources.class), urlFactory);
 
         LoadPolicy loadPolicy = clazz.getAnnotation(LoadPolicy.class);
         loadType = (loadPolicy != null) ? loadPolicy.value() : FIRST;
 
         HotReload hotReload = clazz.getAnnotation(HotReload.class);
+
         if (hotReload != null) {
+
+            if(!"".equals(hotReload.strValue())) {
+                hotReload = this.createNewHotReloadFromStrValue(hotReload, urlFactory);
+            }
+
             hotReloadLogic = new HotReloadLogic(hotReload, uris, this);
 
             if (hotReloadLogic.isAsync())
@@ -157,6 +138,51 @@ class PropertiesManager implements Reloadable, Accessible, Mutable {
                 }
             }
         }
+    }
+
+    /**
+     * this function replace the value by strValue if not empty
+     * @param hotReload
+     * @param urlFactory
+     * @return
+     */
+    private HotReload createNewHotReloadFromStrValue(final HotReload hotReload, final ConfigURIFactory urlFactory ) {
+        final TimeUnit hotReloadTimeUnit = hotReload.unit();
+        final HotReloadType hotReloadType = hotReload.type();
+        final String strValue = hotReload.strValue();
+        final long value = hotReload.value();
+        // recreate a @hotReload with transformed value in URI
+        HotReload newHotReload = new HotReload() {
+            public Class<? extends Annotation> annotationType() {
+                return HotReload.class;
+            }
+
+            public long value() {
+                long newValue = value;
+                try {
+                    if (!"".equals(strValue)) {
+                        newValue = Long.parseLong(asString(urlFactory.newURI(strValue)));
+                    }
+                } catch (URISyntaxException e) {
+                    ignore();
+                } finally {
+                    return newValue;
+                }
+            }
+
+            public TimeUnit unit() {
+                return hotReloadTimeUnit;
+            }
+
+            public HotReloadType type() {
+                return hotReloadType;
+            }
+
+            public String strValue() {
+                return null;
+            }
+        };
+        return newHotReload;
     }
 
     /**

@@ -9,6 +9,9 @@
 package org.aeonbits.owner;
 
 
+import org.aeonbits.owner.crypto.Decryptor;
+import org.aeonbits.owner.crypto.IdentityDecryptor;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Documented;
@@ -27,9 +30,6 @@ import static org.aeonbits.owner.Config.HotReloadType.SYNC;
 import static org.aeonbits.owner.Config.LoadType.FIRST;
 import static org.aeonbits.owner.Util.ignore;
 import static org.aeonbits.owner.Util.reverse;
-
-import org.aeonbits.owner.crypto.Decryptor;
-import org.aeonbits.owner.crypto.IdentityDecryptor;
 /**
  * Marker interface that must be implemented by all Config sub-interfaces.
  * <p>
@@ -243,6 +243,19 @@ public interface Config extends Serializable {
          * @return the hot reload type; default is SYNC.
          */
         HotReloadType type() default SYNC;
+
+
+        /**
+         * <p>
+         * The interval, expressed in seconds (by default), to perform checks on the filesystem to identify modified
+         * files and eventually perform the reloading of the properties. By default is empty.
+         *</p>
+         * <p>
+         *  The value can be an URI if the URI is in property of ConfigFactory
+         * </p>
+         * @return the hot reload value; default is "".
+         */
+        String strValue() default "";
     }
 
     /**

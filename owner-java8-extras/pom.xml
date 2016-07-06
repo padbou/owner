@@ -12,11 +12,11 @@
 
     <parent>
         <artifactId>owner-parent</artifactId>
-        <groupId>org.aeonbits.owner</groupId>
+        <groupId>fr.auchan.owner</groupId>
         <version>1.0.10-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.aeonbits.owner</groupId>
+    <groupId>fr.auchan.owner</groupId>
     <artifactId>owner-java8-extras</artifactId>
     <name>OWNER :: Java 8 Extras</name>
     <version>1.0.10-SNAPSHOT</version>
@@ -57,7 +57,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.aeonbits.owner</groupId>
+            <groupId>fr.auchan.owner</groupId>
             <artifactId>owner-java8</artifactId>
             <version>1.0.10-SNAPSHOT</version>
         </dependency>

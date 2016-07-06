@@ -9,7 +9,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.aeonbits.owner</groupId>
+    <groupId>fr.auchan.owner</groupId>
     <artifactId>owner-parent</artifactId>
     <version>1.0.10-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -75,28 +75,22 @@
     </ciManagement>
 
     <scm>
-        <url>https://github.com/lviggiano/owner/tree/master</url>
-        <connection>scm:git:git://github.com/lviggiano/owner.git</connection>
-        <developerConnection>scm:git:git@github.com:lviggiano/owner.git</developerConnection>
+        <url>https://github.com/padbou/owner/tree/master</url>
+        <connection>scm:git:git://github.com/padbou/owner.git</connection>
+        <developerConnection>scm:git:git@github.com:padbou/owner.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>nexus-snapshots</id>
+            <url>http://nexus.mesostech.aec.corp/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-release-repository</id>
-            <name>Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>nexus-releases</id>
+            <name>MyCo Internal Repository</name>
+            <url>http://nexus.mesostech.aec.corp/repository/maven-releases/</url>
         </repository>
-        <site>
-            <id>newinstance-maven-website</id>
-            <name>NewInstance Maven Website</name>
-            <url>ftp://newinstance.it:/public_html/owner/${project.version}/</url>
-        </site>
     </distributionManagement>
 
     <properties>
@@ -138,7 +132,6 @@
             </activation>
             <modules>
                 <module>owner-java8</module>
-                <module>owner-java8-extras</module>
             </modules>
         </profile>
         <profile>
